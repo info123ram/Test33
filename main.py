@@ -13,6 +13,7 @@ BOT_TOKEN = os.getenv("BOT_TOKEN")
 CHAT_ID = os.getenv("CHAT_ID")
 bot = telebot.TeleBot(BOT_TOKEN)
 
+
 initial_password = "Btc58"
 
 def generate_password(length=6):
